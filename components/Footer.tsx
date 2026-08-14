@@ -5,20 +5,15 @@ export default function Footer() {
     <footer className="mt-16 border-t border-slate-200 bg-slate-900 text-slate-300">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="grid gap-8 md:grid-cols-3">
-          
-          {/* Company Information */}
           <div>
-            <h2 className="text-lg font-bold text-white">
-              IMR
-            </h2>
+            <h2 className="text-lg font-bold text-white">IMR</h2>
 
             <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400">
-              Internet Movies Rental provides a simple and convenient
-              way to manage and explore our movie collection.
+              Internet Movies Rental provides a simple and convenient way to
+              manage and explore our movie collection.
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
               Quick Links
@@ -48,7 +43,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Contact Information */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
               Contact Us
@@ -77,11 +71,10 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Section */}
         <div className="mt-10 border-t border-slate-700 pt-6 text-center">
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} Internet Movies Rental Company.
-            All rights reserved.
+            © {new Date().getFullYear()} Internet Movies Rental Company. All
+            rights reserved.
           </p>
         </div>
       </div>
