@@ -4,27 +4,55 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSideClient } from "@/lib/supabase/client";
 
-export default function MovieForm() {
+export default function EditMovieForm({ movie }: { movie: any }) {
   const router = useRouter();
   const supabase = createBrowserSideClient();
 
-  const [title, setTitle] = useState("");
-  const [releaseYear, setReleaseYear] = useState("");
-  const [actors, setActors] = useState<string[]>([]);
+  const [title, setTitle] = useState(movie.title);
+  const [releaseYear, setReleaseYear] = useState(String(movie.release_year));
+  const [actors, setActors] = useState<string[]>(movie.actors || []);
   const [actorInput, setActorInput] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const { error } = await supabase.from("movies").insert({
-      title,
-      release_year: Number(releaseYear),
-      actors,
-    });
+    let image_url = movie.image_url;
+
+    // If user uploads a new image, replace the old one
+    if (imageFile) {
+      const fileName = `${Date.now()}-${imageFile.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("movies")
+        .upload(fileName, imageFile);
+
+      if (uploadError) {
+        console.error(uploadError);
+        alert("Image upload failed");
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("movies")
+        .getPublicUrl(fileName);
+
+      image_url = publicUrlData.publicUrl;
+    }
+
+    const { error } = await supabase
+      .from("movies")
+      .update({
+        title,
+        release_year: Number(releaseYear),
+        actors,
+        image_url,
+      })
+      .eq("id", movie.id);
 
     if (error) {
       console.error(error);
-      alert("Error adding movie");
+      alert("Error updating movie");
       return;
     }
 
@@ -42,9 +70,7 @@ export default function MovieForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
-      <h1 className="text-2xl font-bold">Add New Movie</h1>
-
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
       <div>
         <label className="block font-medium mb-1">Title</label>
@@ -52,7 +78,6 @@ export default function MovieForm() {
           className="border p-2 w-full"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="The Matrix"
           required
         />
       </div>
@@ -67,7 +92,6 @@ export default function MovieForm() {
           max={2100}
           value={releaseYear}
           onChange={(e) => setReleaseYear(e.target.value)}
-          placeholder="1999"
           required
         />
       </div>
@@ -81,7 +105,7 @@ export default function MovieForm() {
             className="border p-2 flex-1"
             value={actorInput}
             onChange={(e) => setActorInput(e.target.value)}
-            placeholder="Keanu Reeves"
+            placeholder="Add actor"
           />
           <button
             type="button"
@@ -92,7 +116,6 @@ export default function MovieForm() {
           </button>
         </div>
 
-        {/* Actor List */}
         <ul className="mt-3 space-y-2">
           {actors.map((actor, index) => (
             <li
@@ -112,8 +135,19 @@ export default function MovieForm() {
         </ul>
       </div>
 
+      {/* Image Upload */}
+      <div>
+        <label className="block font-medium mb-1">Replace Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+          className="border p-2 w-full"
+        />
+      </div>
+
       <button className="bg-green-600 text-white px-4 py-2 rounded">
-        Add Movie
+        Save Changes
       </button>
     </form>
   );
