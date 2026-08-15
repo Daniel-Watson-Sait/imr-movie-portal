@@ -1,15 +1,17 @@
 import { createServerSideClient } from "@/lib/supabase/server";
 import EditMovieForm from "@/components/EditMovieForm";
 
-export default async function EditMoviePage({ params }: { params: { id: string } }) {
+export default async function EditMoviePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   const supabase = await createServerSideClient();
 
   const { data: movie, error } = await supabase
     .from("movies")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", Number(id))
     .single();
-
+  
   if (error || !movie) {
     return <div className="p-6">Movie not found.</div>;
   }
